@@ -24,8 +24,10 @@ def HTML_dirTree_parser(tree):
                 HELLO THERE
                 """
                 balance = soup.find('div', class_='flex balanceWrapper').text
+                print(balance)
                 for flexBox in soup.find_all('div', class_='flex column whiteBox poolWidget flexAuto'):
                     stakeBox_name = flexBox.find('div', class_='flex column flexAuto').find('strong').text
+                    print(stakeBox_name)
                     #
                     _list = list() # list = list(APY, Pool Supply, Total Staked, Reward Rate)
                     APY_Box = flexBox.find('div', class_='flex flexAuto column borderedBox')
@@ -44,7 +46,18 @@ def HTML_dirTree_parser(tree):
                 #
                 for flexBox in soup.find_all('div', class_='flex column borderedBox poolWidget flexAuto'):
                     '''Do smthing'''
-                    pass
+                    stakeBox_name = flexBox.find('div', class_='flex column flexAuto').find('strong').text
+                    print(stakeBox_name)
+                    #
+                    _list = list() # list = list(APY, Pool Supply, Total Staked, Reward Rate)
+                    APY_Box = flexBox.find('div', class_='flex flexAuto column borderedBox')
+                    try:
+                        for class_tag in APY_Box.find_all(class_='flex row'):
+                            _list.append(class_tag)
+                    except AttributeError:
+                            _list.append('NoneType')
+                    print(_list)
+
             break
 
 
