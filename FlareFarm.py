@@ -27,7 +27,8 @@ def parse_dirTree(tree):
             print('TOTAL = ', sum, '\n')
 
 def main():
-    staked_SFIN = 0.0000_5717_6279_19914
+    old_staked_SFIN = 0.0000_5717_6279_19914
+    staked_SFIN = 0.0000_9860_9337_971209
     print("Hello World", '\t', staked_SFIN)
 
     *_, SGB, EXFI, SFIN = last_entries
