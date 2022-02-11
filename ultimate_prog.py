@@ -1,6 +1,8 @@
 from bs4 import BeautifulSoup
 from func import *
 
+import json
+
 
 
 
@@ -8,27 +10,30 @@ from func import *
 def HTML_dirTree_parser(tree):
 
 
-    class HTML_timestamp_data():
-        def __init__(self, html_timestamp):
-            self.html_timestamp = html_timestamp
-
-
     def flarefarm_snapshot_parser(cls):
         '''insert class'''
+
+        D = dict()
+
         for flexBox in soup.find_all('div', class_=cls):
             stakeBox_name = flexBox.find('div', class_='flex column flexAuto').find('strong').text
             rewardBox_name = flexBox.find('div', class_='flex column align-end').find('strong').text
-            print(stakeBox_name, "\t", rewardBox_name)
-            #
+            if rewardBox_name == 'DFLR': stakeBox_name += '|2'
+            # print(stakeBox_name, "\t", rewardBox_name)
+
+            D.update({stakeBox_name: {'reward': rewardBox_name}})
+
             _list = list() # list = list(APY, Pool Supply, Total Staked, Reward Rate)
             APY_Box = flexBox.find('div', class_='flex flexAuto column borderedBox')
             try:
                 for class_tag in APY_Box.find_all(class_='flex row'):
                     for div_tag in class_tag.find_all('div'):
                         _list.append(div_tag.find('p').text)
+
+                D[stakeBox_name].update(zip(_list[::2], _list[1::2]))
             except AttributeError:
                 _list.append('NoneType')
-            print(_list)
+            # print(_list)
             #
             _list2 = list() # list = list(You Staked, Unclaimed)
             Staked_Box = flexBox.find('div', class_='flex column widgetPersonal whiteBox')
@@ -37,12 +42,18 @@ def HTML_dirTree_parser(tree):
                 _list2.append(Staked_Box.find(name='span').text)
             except AttributeError:
                 _list2.append('NoneType')
-            print(_list2)
+            # print(_list2)
+
+            D[stakeBox_name].update(zip(["You Staked", "Unclaimed"], _list2))
+
             # DelegationReward = flexBox.find('div', class_='flex column flexAuto').find('b')
-            DelegationReward = flexBox.find('div', class_='flex row align-center poolDelegationRow').text
             # if DelegationReward == 'None':
             #     DelegationReward = flexBox.find('div', class_='flex column flexAuto').find('small')
-            print(DelegationReward)
+            DelegationReward = flexBox.find('div', class_='flex row align-center poolDelegationRow').text
+            # print(DelegationReward)
+
+            D[stakeBox_name].update({'delegation': DelegationReward})
+        return D
 
 
     def isHTML(file):
@@ -52,17 +63,29 @@ def HTML_dirTree_parser(tree):
     for file in tree:
         if isHTML(file):
             html_timestamp = html_filename_disambiguation(file)
-            print(html_timestamp)
+
+            snapshot = {
+                'timestamp': html_timestamp,
+            }
+
             with open(file) as f:
                 soup = BeautifulSoup(f, 'lxml')
-                #
                 balance = soup.find('div', class_='flex balanceWrapper').text
-                print(balance)
+
+                snapshot.update({'SGB_balance': float(balance.split(' ')[0])})
                 #
                 box_type = {'activated':'flex column whiteBox poolWidget flexAuto',
                             'passive':'flex column borderedBox poolWidget flexAuto'}
+
+                snapshot.update({'flexBox': dict()})
                 for value in box_type.items():
-                    flarefarm_snapshot_parser(value)
+                    S = flarefarm_snapshot_parser(value)
+                    snapshot['flexBox'].update(S)
+                    # print(S)
+
+                data = json.dumps(snapshot, indent=3)
+    print(data)
+
 
 
 
