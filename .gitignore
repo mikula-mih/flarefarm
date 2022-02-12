@@ -2,3 +2,7 @@
 __pycache__
 *files
 *.html
+json
+flare_snapshots_html/*
+
+fflarefarm-IPython
